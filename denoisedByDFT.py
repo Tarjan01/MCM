@@ -1,3 +1,8 @@
+## use DFT to denoise the data
+## to do: 
+## 1. find the optimal threshold of DFT
+## 2. explain why denoised data is better(graphs, etc.)
+
 import numpy as np
 import pandas as pd
 import seaborn as sns
