@@ -15,24 +15,22 @@ def load(dir):
         return pkl.load(file)
 
 
-
-def deal_serve(df:pd.DataFrame):
-    ''' this is used to aggregate features concerning serving'''
-    if 'serve' in df.columns:
-        print('already modified')
+def deal_serve(df: pd.DataFrame):
+    """this is used to aggregate features concerning serving"""
+    if "serve" in df.columns:
+        print("already modified")
         return df
     else:
-        df=df.drop('return_depth',axis=1)
+        df = df.drop("return_depth", axis=1)
         # standardize the speed_mph
-        mean = df['speed_mph'].mean()
-        std = df['speed_mph'].std()
-        df['speed_mph'] = (df['speed_mph'] - mean) / std
+        mean = df["speed_mph"].mean()
+        std = df["speed_mph"].std()
+        df["speed_mph"] = (df["speed_mph"] - mean) / std
 
         # see the missing gap
         # plt.plot(df.speed_mph)
         # plt.title("missing gap of speed_mph")
         # plt.show()
-
 
         data = df.drop(range(81, 569), axis=0)
         # fill the residual speed with mean
@@ -52,11 +50,12 @@ def deal_serve(df:pd.DataFrame):
         kde_values1 = kde.evaluate(x_grid)
 
         bestspeed = x_grid[(kde_values - kde_values1).argmax()]
-        data["serve"] = (data.server * 2 - 3) * np.exp(-np.abs(data.speed_mph - bestspeed))
+        data["serve"] = (data.server * 2 - 3) * np.exp(
+            -np.abs(data.speed_mph - bestspeed)
+        )
 
         # drop missing serve_width
         data = data.dropna(how="any")
-
 
         # assign number for serve_width (include B or not)
         def chech_char(s, char):
@@ -70,16 +69,19 @@ def deal_serve(df:pd.DataFrame):
         df = pd.concat([df, data.serve], axis=1)
         negmean = df[df.serve < 0].serve.mean()
         posmean = df[df.serve > 0].serve.mean()
-        df["server"] = df["server"].replace({1:negmean,2:posmean})
+        df["server"] = df["server"].replace({1: negmean, 2: posmean})
         df["serve"] = df["serve"].fillna(df["server"])
+        servemean = df["serve"].mean()
+        servestd = df["serve"].std()
+        df["serve"] = (df["serve"] - servemean) / servestd
         filtered_column = [item for item in df.columns if "serve" not in item]
-        filtered_column.extend(['serve', 'serve_no'])
+        filtered_column.extend(["serve", "serve_no"])
         new_index = pd.Index(filtered_column)
-        new_index=new_index.drop(['speed_mph'])
+        new_index = new_index.drop(["speed_mph"])
         return df[new_index]
 
 
-if __name__=='__main__':
+if __name__ == "__main__":
     data = pd.read_csv("C:/Users/。/Desktop/mc/data/data2(1).csv")
-    data1=deal_serve(data)
+    data1 = deal_serve(data)
     data1.to_csv("C:/Users/。/Desktop/mc/data/data3.csv")
