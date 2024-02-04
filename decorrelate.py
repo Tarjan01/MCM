@@ -11,12 +11,12 @@ class decorrelate:
 
     def decorr(self, main: pd.Series, sub: pd.Series):
         return (main - self.cor * self.mainstd / self.substd * sub - self.intercept) / (
-            self.mainstd * np.sqrt(1 + self.cor**2)
+            self.mainstd * np.sqrt(1 - self.cor**2)
         )
 
     def inverse(self, res: pd.Series, sub: pd.Series):
         return (
-            res * (self.mainstd * np.sqrt(1 + self.cor**2))
+            res * (self.mainstd * np.sqrt(1 - self.cor**2))
             + self.intercept
             + self.cor * self.mainstd / self.substd * sub
         )
