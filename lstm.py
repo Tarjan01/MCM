@@ -162,9 +162,18 @@ def calcAq():
     for i in range(indices_test.shape[0]):
         if(winner_pred[indices_test[i][0]] == winner.iloc[indices_test[i][0]].values[0]):
             testPredcorrect += 1
+    # print(st_val[0] + len(X_train) - st_train[len(st_train) - 1])
+    # print(st_test[0] + len(X_train) + len(X_val) - (st_val[len(st_val) - 1] + len(X_train)))
+    # exit()
+    for j in range(st_train[len(st_train) - 1], st_val[0] + len(X_train), 1):
+        if(winner_pred[j] == winner.iloc[j].values[0]):
+            testPredcorrect += 1
+    for j in range(st_val[len(st_val) - 1] + len(X_train), st_test[0] + len(X_train) + len(X_val), 1):
+        if(winner_pred[j] == winner.iloc[j].values[0]):
+            testPredcorrect += 1
     
     print(f"valAccuracy: {valPredcorrect / indices_val.shape[0]}")
-    print(f"testAccuracy: {testPredcorrect / indices_test.shape[0]}")
+    print(f"testAccuracy: {testPredcorrect / (indices_test.shape[0] + st_val[0] + len(X_train) - st_train[len(st_train) - 1] + st_test[0] + len(X_train) + len(X_val) - (st_val[len(st_val) - 1] + len(X_train)))}")
 def calcAq2():
     model = load_model('my_model.h5', custom_objects={'Attention': Attention})
     y_pred = model.predict(X_all)
@@ -181,13 +190,29 @@ def calcAq2():
     
     winner = pd.read_csv('./assets/doc/winner.csv', encoding='utf-8')
     winner_pred = [0] * y_pred.shape[0]
-    print(winner.shape[0], y_pred.shape[0])
+    # print(len(st_train), len(st_val), len(st_test))
     # exit()
     for i in range(y_pred.shape[0]):
         if(y_pred[i] > 0):
             winner_pred[i] = 2
         else:
             winner_pred[i] = 1
+            
+    trainPredcorrect = 0
+    for i in range(len(st_train) - 1):
+        trainPredcorrect = 0
+        for j in range(st_train[i], st_train[i + 1], 1):
+            if(winner_pred[j] == winner.iloc[j].values[0]):
+                trainPredcorrect += 1
+        print(f"trainAccuracy: {trainPredcorrect / (st_train[i + 1] - st_train[i])}")
+    
+    valPredcorrect = 0
+    for i in range(len(st_val) - 1):
+        valPredcorrect = 0
+        for j in range(st_val[i], st_val[i + 1], 1):
+            if(winner_pred[j] == winner.iloc[j].values[0]):
+                valPredcorrect += 1
+        print(f"valAccuracy: {valPredcorrect / (st_val[i + 1] - st_val[i])}")
     
     for i in range(len(st_test) - 1):
         testPredcorrect = 0
@@ -195,6 +220,18 @@ def calcAq2():
             if(winner_pred[j] == winner.iloc[j].values[0]):
                 testPredcorrect += 1
         print(f"testAccuracy: {testPredcorrect / (st_test[i + 1] - st_test[i])}")
+    
+    testPredcorrect = 0
+    for j in range(st_train[len(st_train) - 1], st_val[0] + len(X_train), 1):
+        if(winner_pred[j] == winner.iloc[j].values[0]):
+            testPredcorrect += 1
+    print(f"testAccuracy: {testPredcorrect / (st_val[0] + len(X_train) - st_train[len(st_train) - 1])}")
+    
+    testPredcorrect = 0
+    for j in range(st_val[len(st_val) - 1] + len(X_train), st_test[0] + len(X_train) + len(X_test), 1):
+        if(winner_pred[j] == winner.iloc[j].values[0]):
+            testPredcorrect += 1
+    print(f"testAccuracy: {testPredcorrect / (st_test[0] + len(X_train) + len(X_test) - (st_val[len(st_val) - 1] + len(X_train)))}")
         
 
 def continueTrain():
@@ -242,7 +279,7 @@ def load_data(num):
 
 if __name__ == "__main__":
     print("pos0")
-    data_frame = pd.read_csv('./assets/doc/inputdata_updated.csv', encoding='utf-8',)
+    data_frame = pd.read_csv('./assets/doc/tmp.csv', encoding='utf-8',)
     
     X_all = []
     X_train = []
@@ -285,7 +322,8 @@ if __name__ == "__main__":
             st_val.append(sum([x.shape[0] for x in X_val]))
             X_val.append(X)
             y_val.append(y)
-            indices_val.extend(indices)
+            if(i < train_size + val_size - 1):
+                indices_val.extend(indices)
         else:
             st_test.append(sum([x.shape[0] for x in X_test]))
             X_test.append(X)
@@ -315,5 +353,5 @@ if __name__ == "__main__":
     # changeLearningRateandContinueTrain()
     # firstTrain()
     # showFig()
-    # calcAq()
+    calcAq()
     calcAq2()
