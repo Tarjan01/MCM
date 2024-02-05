@@ -38,6 +38,8 @@ struct node {
     string p1_break_pt,p2_break_pt,p1_break_pt_won,p2_break_pt_won,p1_break_pt_missed,p2_break_pt_missed;
     string p1_distance_run,p2_distance_run,rally_count,speed_mph,serve_width,serve_depth,return_depth;
     int p1_side, p2_side;
+    int winner;
+    int serve;
 }a[MAXN];
 
 typedef pair<string, string> pss;
@@ -46,10 +48,9 @@ map<string, pss> mp;
 
 int main()
 {
-    freopen("2.txt", "r", stdin);
-    cin>>match_id>>player1>>player2>>elapsed_time>>set_no>>game_no>>point_no>>p1_sets>>p2_sets>>p1_games>>p2_games>>p1_score>>p2_score>>server>>serve_no>>point_victor>>p1_points_won>>p2_points_won>>game_victor>>set_victor>>p1_ace>>p2_ace>>p1_winner>>p2_winner>>winner_shot_type>>p1_double_fault>>p2_double_fault>>p1_unf_err>>p2_unf_err>>p1_net_pt>>p2_net_pt>>p1_net_pt_won>>p2_net_pt_won>>p1_break_pt>>p2_break_pt>>p1_break_pt_won>>p2_break_pt_won>>p1_break_pt_missed>>p2_break_pt_missed>>p1_distance_run>>p2_distance_run>>rally_count>>speed_mph>>serve_width>>serve_depth>>return_depth;
-    cout<<match_id<<","<<player1<<","<<player2<<","<<elapsed_time<<","<<set_no<<","<<game_no<<","<<point_no<<","<<p1_sets<<","<<p2_sets<<","<<p1_games<<","<<p2_games<<","<<p1_score<<","<<p2_score<<","<<server<<","<<serve_no<<","<<point_victor<<","<<p1_points_won<<","<<p2_points_won<<","<<game_victor<<","<<set_victor<<","<<p1_ace<<","<<p2_ace<<","<<p1_winner<<","<<p2_winner<<","<<winner_shot_type<<","<<p1_double_fault<<","<<p2_double_fault<<","<<p1_unf_err<<","<<p2_unf_err<<","<<p1_net_pt<<","<<p2_net_pt<<","<<p1_net_pt_won<<","<<p2_net_pt_won<<","<<p1_break_pt<<","<<p2_break_pt<<","<<p1_break_pt_won<<","<<p2_break_pt_won<<","<<p1_break_pt_missed<<","<<p2_break_pt_missed<<","<<p1_distance_run<<","<<p2_distance_run<<","<<rally_count<<","<<speed_mph<<","<<serve_width<<","<<serve_depth<<","<<return_depth<<",p1_side,p2_side"<<endl;
-    
+    freopen("./assets/doc/output.csv", "r", stdin);
+    // freopen("input.csv", "w", stdout);
+    int n = 0;
     For(i, 1, N) {
         cin>>a[i].match_id>>a[i].player1_first>>a[i].player1_last>>a[i].player2_first>>a[i].player2_last>>a[i].elapsed_time>>a[i].set_no>>a[i].game_no>>a[i].point_no>>a[i].p1_sets>>a[i].p2_sets>>a[i].p1_games>>a[i].p2_games>>a[i].p1_score>>a[i].p2_score>>a[i].server>>a[i].serve_no>>a[i].point_victor>>a[i].p1_points_won>>a[i].p2_points_won>>a[i].game_victor>>a[i].set_victor>>a[i].p1_ace>>a[i].p2_ace>>a[i].p1_winner>>a[i].p2_winner>>a[i].winner_shot_type>>a[i].p1_double_fault>>a[i].p2_double_fault>>a[i].p1_unf_err>>a[i].p2_unf_err>>a[i].p1_net_pt>>a[i].p2_net_pt>>a[i].p1_net_pt_won>>a[i].p2_net_pt_won>>a[i].p1_break_pt>>a[i].p2_break_pt>>a[i].p1_break_pt_won>>a[i].p2_break_pt_won>>a[i].p1_break_pt_missed>>a[i].p2_break_pt_missed>>a[i].p1_distance_run>>a[i].p2_distance_run>>a[i].rally_count>>a[i].speed_mph>>a[i].serve_width>>a[i].serve_depth>>a[i].return_depth;
         if(mp.find(a[i].match_id) == mp.end())
@@ -79,16 +80,42 @@ int main()
         else if(a[i].p2_score < 40 && a[i].p1_score == 40) {
             a[i].p2_score /= 15, a[i].p1_score = 3;
         }
+        if(a[i].p1_score < 40 && a[i].p2_score < 40) {
+            a[i].p1_score /= 15, a[i].p2_score /= 15;
+        }
+        else if(a[i].p1_score < 40 && a[i].p2_score == 40) {
+            a[i].p1_score /= 15, a[i].p2_score = 3;
+        }
+        else if(a[i].p2_score < 40 && a[i].p1_score == 40) {
+            a[i].p2_score /= 15, a[i].p1_score = 3;
+        }
         else {
-            if(a[i - 1].p1_score < 3 || a[i - 1].p2_score < 3) a[i].p1_score = a[i].p2_score = 3;
+            if(a[i].p1_score == 50) a[i].p1_score = a[i - 1].p1_score + 1, a[i].p2_score = a[i - 1].p2_score;
+            else if(a[i].p2_score == 50) a[i].p2_score = a[i - 1].p2_score + 1, a[i].p1_score = a[i - 1].p1_score;
+            else if(a[i - 1].p1_score < 3 || a[i - 1].p2_score < 3) a[i].p1_score = a[i].p2_score = 3;
             else {
-                if(a[i].p1_score == 50) a[i].p1_score = a[i - 1].p1_score + 1, a[i].p2_score = a[i - 1].p2_score;
-                else a[i].p2_score = a[i - 1].p2_score + 1, a[i].p1_score = a[i - 1].p1_score;
+                if(a[i - 1].p1_score > a[i - 1].p2_score) a[i].p2_score = a[i - 1].p2_score + 1, a[i].p1_score = a[i - 1].p1_score;
+                else a[i].p1_score = a[i - 1].p1_score + 1, a[i].p2_score = a[i - 1].p2_score;
             }
         }
-		cout<<a[i].match_id<<","<<a[i].player1_first + " "<<a[i].player1_last<<","<<a[i].player2_first + " "<<a[i].player2_last<<","<<a[i].elapsed_time<<","<<a[i].set_no<<","<<a[i].game_no<<","<<a[i].point_no<<","<<a[i].p1_sets<<","<<a[i].p2_sets<<","<<a[i].p1_games<<","<<a[i].p2_games<<","<<a[i].p1_score<<","<<a[i].p2_score<<","<<a[i].server<<","<<a[i].serve_no<<","<<a[i].point_victor<<","<<a[i].p1_points_won<<","<<a[i].p2_points_won<<","<<a[i].game_victor<<","<<a[i].set_victor<<","<<a[i].p1_ace<<","<<a[i].p2_ace<<","<<a[i].p1_winner<<","<<a[i].p2_winner<<","<<a[i].winner_shot_type<<","<<a[i].p1_double_fault<<","<<a[i].p2_double_fault<<","<<a[i].p1_unf_err<<","<<a[i].p2_unf_err<<","<<a[i].p1_net_pt<<","<<a[i].p2_net_pt<<","<<a[i].p1_net_pt_won<<","<<a[i].p2_net_pt_won<<","<<a[i].p1_break_pt<<","<<a[i].p2_break_pt<<","<<a[i].p1_break_pt_won<<","<<a[i].p2_break_pt_won<<","<<a[i].p1_break_pt_missed<<","<<a[i].p2_break_pt_missed<<","<<a[i].p1_distance_run<<","<<a[i].p2_distance_run<<","<<a[i].rally_count<<","<<a[i].speed_mph<<","<<a[i].serve_width<<","<<a[i].serve_depth<<","<<a[i].return_depth<<","<<a[i].p1_side<<","<<a[i].p2_side<<endl;
+		// cout<<a[i].p1_score<<","<<a[i].p2_score<<endl;
     }
-    for(auto [a,b]:mp) {
-        cout << a + "," + b.first + "," + b.second << endl;
+    For(i, 1, n) {
+        if(i == 1 || a[i].p1_score < a[i - 1].p1_score || a[i].p2_score < a[i - 1].p2_score) {
+            if(a[i].p1_score) a[i].winner = 1;
+            else a[i].winner = 2;
+        }
+        else {
+            if(a[i].p1_score > a[i - 1].p1_score) a[i].winner = 1;
+            else a[i].winner = 2;
+        }
+    }
+    int x = 0, y = 0;
+    cout << "p1_points_won" << "," << "p2_points_won" << "," << "winner" << "," << "server" << endl;
+    For(i, 1, n) {
+        if(a[i].winner == 1) x++;
+        else y++;
+        cout << x << "," << y << "," << a[i].winner << "," << a[i].serve << "\n";
+        // cout << a[i].p1_score << "," << a[i].p2_score << "," << a[i].winner << endl;
     }
 }
