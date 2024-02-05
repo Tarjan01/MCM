@@ -5,9 +5,9 @@ from matplotlib import pyplot as plt
 
 def expdecay(match_id: pd.Series, acc1: pd.Series, acc2: pd.Series):
     def exponential_decay(impulse_series, decay_rate=1):
-        accumulation = np.zeros(len(impulse_series))  # 初始化累积数组
+        accumulation = np.zeros(len(impulse_series))
         for i in range(len(impulse_series)):
-            if impulse_series.iloc[i] == 1:  # 使用.iloc来访问序列
+            if impulse_series.iloc[i] == 1:
                 for j in range(i, min(len(impulse_series), i + 20)):
                     accumulation[j] += np.exp(-decay_rate * (j - i))
         return accumulation
@@ -22,6 +22,24 @@ def expdecay(match_id: pd.Series, acc1: pd.Series, acc2: pd.Series):
     shifted = df.groupby("match_id")["accumulation"].apply(shift_group)
     shifted.index = shifted.index.droplevel("match_id")
     return shifted
+
+
+def expdecay_advantage(
+    match_id: pd.Series, flow: pd.Series, acc1: pd.Series, acc2: pd.Series
+):
+    def exponential_decay(impulse_series, decay_rate=1):
+        accumulation = np.zeros(len(impulse_series))
+        for i in range(len(impulse_series)):
+            if impulse_series.iloc[i] == 1:
+                for j in range(i, min(len(impulse_series), i + 20)):
+                    accumulation[j] += np.exp(-decay_rate * (j - i))
+        return accumulation
+
+    df = pd.concat([match_id, flow, acc1, acc2], axis=1)
+    accu = df.groupby("match_id")[acc2.name].transform(exponential_decay) - df.groupby(
+        "match_id"
+    )[acc1.name].transform(exponential_decay)
+    return accu * np.sign(df[flow.name])
 
 
 if __name__ == "__main__":
