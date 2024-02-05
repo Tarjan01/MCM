@@ -53,4 +53,16 @@ inputdata = data[
         "break_pt_missed",
     ]
 ]
-inputdata.to_csv('C:/Users/。/Desktop/mc/data/inputdata.csv',index=False)
+inputdata.loc[:, "p1_distance_run"] = (
+    inputdata["p1_distance_run"] - inputdata["p1_distance_run"].mean()
+) / inputdata["p1_distance_run"].std()
+inputdata.loc[:, "p2_distance_run"] = (
+    inputdata["p2_distance_run"] - inputdata["p2_distance_run"].mean()
+) / inputdata["p2_distance_run"].std()
+inputdata.loc[:, "p1_distance_run"] = inputdata.groupby("match_id")[
+    "p1_distance_run"
+].shift(1, fill_value=0)
+inputdata.loc[:, "p2_distance_run"] = inputdata.groupby("match_id")[
+    "p2_distance_run"
+].shift(1, fill_value=0)
+inputdata.to_csv("C:/Users/。/Desktop/mc/data/inputdata.csv", index=False)
